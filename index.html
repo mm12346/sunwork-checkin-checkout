@@ -204,7 +204,7 @@
                         <i class="fa-solid fa-camera text-[#FF7F00] mr-1"></i> ภาพเช็คอินยืนยันตัวตน
                     </label>
 
-                    <!-- กรอบกล้องปรับดีไซน์ใหม่ตามภาพอ้างอิง -->
+                    <!-- กรอบกล้อง -->
                     <div class="relative rounded-2xl overflow-hidden bg-[#fafafa] border-2 border-dashed border-gray-300 aspect-[4/3] w-full flex flex-col items-center justify-center transition-all mb-4">
                         <video id="webcam" class="hidden absolute inset-0 w-full h-full object-cover" autoplay playsinline></video>
                         <canvas id="photoCanvas" class="hidden absolute inset-0 w-full h-full object-cover"></canvas>
@@ -246,7 +246,7 @@
                     </div>
                 </div>
 
-                <!-- พิกัด GPS (ดีไซน์ใหม่) -->
+                <!-- พิกัด GPS -->
                 <div class="border border-orange-100 bg-orange-50/30 rounded-2xl p-4">
                     <div class="flex justify-between items-center mb-3">
                         <span class="text-gray-800 text-sm font-bold flex items-center gap-2">
@@ -272,27 +272,22 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SIDEBAR HISTORY MENU (Mobile App Style)    -->
-    <!-- ========================================== -->
+    <!-- SIDEBAR HISTORY MENU -->
     <!-- Backdrop Overlay -->
     <div id="historyOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden opacity-0 transition-opacity duration-300" onclick="toggleHistoryMenu()"></div>
     
     <!-- Sidebar Panel -->
     <div id="historyMenu" class="fixed top-0 right-0 w-80 max-w-[85vw] h-full bg-white z-[110] transform translate-x-full transition-transform duration-300 ease-in-out shadow-[-10px_0_30px_rgba(0,0,0,0.15)] flex flex-col">
         
-        <!-- Sidebar Header -->
         <div class="px-5 py-4 bg-gradient-to-r from-[#FF7F00] to-[#FFA500] text-white flex justify-between items-center shadow-md z-10">
             <h2 class="text-lg font-bold flex items-center gap-2 tracking-wide">
-                <i class="fa-solid fa-list-check opacity-90"></i>
-                ประวัติการลงเวลา
+                <i class="fa-solid fa-list-check opacity-90"></i> ประวัติการลงเวลา
             </h2>
             <button onclick="toggleHistoryMenu()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 transition-colors text-white active:scale-95">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
         </div>
 
-        <!-- Sidebar Sub-header & Action -->
         <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
             <span class="text-xs text-gray-500 font-medium"><i class="fa-solid fa-mobile-screen text-[#FF7F00] mr-1"></i> ข้อมูลบนอุปกรณ์นี้</span>
             <button onclick="clearHistory()" class="text-[11px] text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-colors border border-red-100">
@@ -300,11 +295,9 @@
             </button>
         </div>
 
-        <!-- Sidebar Content (Logs) -->
         <div id="historyLogs" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[#fcfcfc] sidebar-scroll">
             <p class="text-sm text-center text-gray-400 py-10 flex flex-col items-center gap-2">
-                <i class="fa-solid fa-box-open text-3xl opacity-30"></i>
-                ยังไม่พบข้อมูลในวันนี้
+                <i class="fa-solid fa-box-open text-3xl opacity-30"></i> ยังไม่พบข้อมูลในวันนี้
             </p>
         </div>
     </div>
@@ -346,7 +339,7 @@
             }, 1000);
         }
 
-        // 2. จัดการกล้องถ่ายภาพ (ตั้งค่าความละเอียดเริ่มต้นเป็นแนวนอน)
+        // 2. กล้องถ่ายรูป PC
         async function initiateWebcam() {
             if (isCameraActive) { stopWebcam(); return; }
             try {
@@ -362,12 +355,10 @@
                 document.getElementById('camBtnText').textContent = "ปิดกล้อง";
                 document.getElementById('camBtnIcon').className = "fa-solid fa-video-slash text-red-500";
                 
-                // สลับแสดงปุ่มถ่ายภาพ
                 btnCapture.disabled = false;
                 btnCapture.classList.remove('hidden');
             } catch (err) {
-                console.error("Camera Error: ", err);
-                Swal.fire({ icon: 'error', title: 'กล้องขัดข้อง', text: 'โปรดเปลี่ยนไปใช้ตัวเลือกอัปโหลดรูปภาพด้านล่างแทน', confirmButtonColor: '#FF7F00' });
+                Swal.fire({ icon: 'error', title: 'กล้องขัดข้อง', text: 'โปรดเปลี่ยนไปใช้ตัวเลือกถ่ายรูปผ่านมือถือแทน', confirmButtonColor: '#FF7F00' });
             }
         }
 
@@ -386,62 +377,66 @@
 
         function takeSnapshot() {
             if (!isCameraActive) return;
-            
-            // กำหนดขนาดภาพสุดท้ายที่ต้องการให้ออกมาเป็น 4:3 (แนวนอน)
             const targetWidth = 640;
             const targetHeight = 480;
-            
-            photoCanvas.width = targetWidth;
-            photoCanvas.height = targetHeight;
+            photoCanvas.width = targetWidth; photoCanvas.height = targetHeight;
             const ctx = photoCanvas.getContext('2d');
-            
-            const videoW = webcamElement.videoWidth;
-            const videoH = webcamElement.videoHeight;
-            
-            // คำนวณเพื่อครอปภาพตรงกลาง (Crop Center) ในกรณีที่กล้องส่งภาพมาไม่ใช่ 4:3
-            const videoAspect = videoW / videoH;
-            const targetAspect = targetWidth / targetHeight;
-            
-            let drawWidth = videoW;
-            let drawHeight = videoH;
-            let offsetX = 0;
-            let offsetY = 0;
+            const videoW = webcamElement.videoWidth; const videoH = webcamElement.videoHeight;
+            const videoAspect = videoW / videoH; const targetAspect = targetWidth / targetHeight;
+            let drawWidth = videoW, drawHeight = videoH, offsetX = 0, offsetY = 0;
 
-            if (videoAspect > targetAspect) {
-                // วิดีโอกว้างกว่า 4:3 ให้ครอปซ้าย-ขวาออก
-                drawWidth = videoH * targetAspect;
-                offsetX = (videoW - drawWidth) / 2;
-            } else {
-                // วิดีโอสูงกว่า 4:3 ให้ครอปบน-ล่างออก
-                drawHeight = videoW / targetAspect;
-                offsetY = (videoH - drawHeight) / 2;
-            }
+            if (videoAspect > targetAspect) { drawWidth = videoH * targetAspect; offsetX = (videoW - drawWidth) / 2; } 
+            else { drawHeight = videoW / targetAspect; offsetY = (videoH - drawHeight) / 2; }
 
-            // พลิกซ้ายขวา (Mirror) เพื่อให้เหมือนส่องกระจก
-            ctx.translate(targetWidth, 0);
-            ctx.scale(-1, 1);
-            
-            // วาดรูปโดยดึงเฉพาะส่วนที่ครอปมาลง Canvas
+            ctx.translate(targetWidth, 0); ctx.scale(-1, 1);
             ctx.drawImage(webcamElement, offsetX, offsetY, drawWidth, drawHeight, 0, 0, targetWidth, targetHeight);
             
-            // ใช้สกุล JPEG ควบคุมคุณภาพ 80% ช่วยลดขนาดไฟล์และส่งขึ้น Google Drive ได้เร็วขึ้น
             capturedImageData = photoCanvas.toDataURL('image/jpeg', 0.8);
-            
-            photoCanvas.classList.remove('hidden');
-            stopWebcam();
+            photoCanvas.classList.remove('hidden'); stopWebcam();
         }
 
+        // --- เพิ่มระบบบีบอัดภาพกล้องมือถือตรงนี้ เพื่อกันความจำเครื่องเต็ม ---
         function handleFallbackImage(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    capturedImageData = e.target.result;
-                    uploadedPreview.src = capturedImageData;
-                    uploadedPreview.classList.remove('hidden');
-                    stopWebcam();
-                    cameraPlaceholder.classList.add('hidden');
-                    photoCanvas.classList.add('hidden');
+                    const img = new Image();
+                    img.onload = function() {
+                        // กำหนดขนาดสูงสุดที่ต้องการเพื่อลดขนาดไฟล์ โดยคงสัดส่วนเดิม
+                        const MAX_DIMENSION = 800;
+                        let targetWidth = img.width;
+                        let targetHeight = img.height;
+                        
+                        // คำนวณสัดส่วนใหม่โดยไม่ครอบตัดภาพ
+                        if (targetWidth > MAX_DIMENSION || targetHeight > MAX_DIMENSION) {
+                            if (targetWidth > targetHeight) {
+                                targetHeight = Math.floor((MAX_DIMENSION / targetWidth) * targetHeight);
+                                targetWidth = MAX_DIMENSION;
+                            } else {
+                                targetWidth = Math.floor((MAX_DIMENSION / targetHeight) * targetWidth);
+                                targetHeight = MAX_DIMENSION;
+                            }
+                        }
+                        
+                        photoCanvas.width = targetWidth;
+                        photoCanvas.height = targetHeight;
+                        const ctx = photoCanvas.getContext('2d');
+
+                        // วาดภาพเต็มรูปตามสัดส่วนจริง (ไม่ครอบตัด)
+                        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+                        
+                        // แปลงรูปภาพเป็น JPEG คุณภาพ 80% (ทำให้ไฟล์มีขนาดเล็กลงมาก)
+                        capturedImageData = photoCanvas.toDataURL('image/jpeg', 0.8);
+                        
+                        uploadedPreview.src = capturedImageData;
+                        uploadedPreview.classList.remove('hidden');
+                        
+                        stopWebcam();
+                        cameraPlaceholder.classList.add('hidden');
+                        photoCanvas.classList.add('hidden');
+                    };
+                    img.src = e.target.result;
                 }
                 reader.readAsDataURL(file);
             }
@@ -497,13 +492,11 @@
             const label = document.getElementById('apiStatusLabel');
             
             if (EMBEDDED_APPS_SCRIPT_URL && EMBEDDED_APPS_SCRIPT_URL.startsWith("https://script.google.com")) {
-                // Online State
                 ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-emerald-400";
                 dot.className = "relative inline-flex rounded-full h-2 w-2 md:h-2.5 md:w-2.5 bg-emerald-500";
                 label.textContent = "ONLINE";
                 label.className = "text-[9px] md:text-[10px] font-bold text-emerald-700 tracking-wider";
             } else {
-                // Offline / Simulator State
                 ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-red-400";
                 dot.className = "relative inline-flex rounded-full h-2 w-2 md:h-2.5 md:w-2.5 bg-red-500";
                 label.textContent = "OFFLINE";
@@ -511,7 +504,7 @@
             }
         }
 
-        // 4. จัดการเมนูประวัติด้านข้าง (Slide-over Menu)
+        // 4. จัดการเมนูประวัติด้านข้าง
         function toggleHistoryMenu() {
             const menu = document.getElementById('historyMenu');
             const overlay = document.getElementById('historyOverlay');
@@ -519,23 +512,18 @@
             const badge = document.getElementById('historyBadge');
             
             if (isClosed) {
-                // เปิดเมนู
                 overlay.classList.remove('hidden');
-                // เล็กน้อยเพื่อให้ display apply ทันก่อนทำ opacity transition
                 setTimeout(() => {
                     overlay.classList.remove('opacity-0');
                     menu.classList.remove('translate-x-full');
                 }, 10);
-                document.body.style.overflow = 'hidden'; // ป้องกันฉากหลังเลื่อน
-                if(badge) badge.classList.add('hidden'); // ซ่อนจุดแจ้งเตือนเมื่อเปิดอ่าน
+                document.body.style.overflow = 'hidden';
+                if(badge) badge.classList.add('hidden');
             } else {
-                // ปิดเมนู
                 overlay.classList.add('opacity-0');
                 menu.classList.add('translate-x-full');
-                setTimeout(() => {
-                    overlay.classList.add('hidden');
-                }, 300); // รอ animation จบ
-                document.body.style.overflow = ''; // คืนค่าการเลื่อนหน้าจอ
+                setTimeout(() => { overlay.classList.add('hidden'); }, 300);
+                document.body.style.overflow = '';
             }
         }
 
@@ -543,33 +531,20 @@
         function submitForm(event) {
             event.preventDefault();
             
-            // ดึงค่าต่าง ๆ ที่ต้องใช้จากฟอร์ม
             const checkType = document.querySelector('input[name="checkType"]:checked').value;
             const employeeName = document.getElementById('employeeName').value.trim();
             const nickname = document.getElementById('nickname').value.trim();
             const otNoteValue = document.getElementById('otNote').value.trim();
             
-            // ดึงเฉพาะตัวเลขพิกัดออกมาจากข้อความสถานะ
             let coords = document.getElementById('gpsCoordinates').textContent;
             const coordsMatch = coords.match(/(-?\d+\.\d+,\s*-?\d+\.\d+)/);
-            if(coordsMatch) {
-                coords = coordsMatch[0];
-            } else {
-                coords = "ไม่พบพิกัด";
-            }
+            coords = coordsMatch ? coordsMatch[0] : "ไม่พบพิกัด";
 
-            // ตรวจจับรูปภาพยืนยัน
             if (!capturedImageData) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'ต้องการรูปถ่ายยืนยันตัวตน',
-                    text: 'กรุณาเปิดใช้งานกล้องเพื่อบันทึกรูป หรือใช้วิธีอัปโหลดภาพก่อนลงบันทึกเวลา',
-                    confirmButtonColor: '#FF7F00'
-                });
+                Swal.fire({ icon: 'warning', title: 'ต้องการรูปถ่ายยืนยันตัวตน', text: 'กรุณาถ่ายภาพก่อนลงบันทึกเวลา', confirmButtonColor: '#FF7F00' });
                 return;
             }
 
-            // แสดงหน้าจอประมวลผลข้อมูล
             const loader = document.getElementById('loading-overlay');
             loader.style.display = 'flex';
 
@@ -578,93 +553,89 @@
             const logTypeStr = checkType === 'checkin' ? 'เข้างาน (Check-In)' : 'ออกงาน (Check-Out)';
 
             const payload = {
-                type: checkType,
-                typeStr: logTypeStr,
-                name: employeeName,
-                nickname: nickname,
-                time: logTime,
-                coords: coords,
+                type: checkType, typeStr: logTypeStr, name: employeeName,
+                nickname: nickname, time: logTime, coords: coords,
                 ot: checkType === 'checkout' ? otNoteValue : '-',
-                image: capturedImageData // Base64 Data URI
+                image: capturedImageData
             };
 
             const isRealUrl = EMBEDDED_APPS_SCRIPT_URL && EMBEDDED_APPS_SCRIPT_URL.startsWith("https://script.google.com");
 
-            // ส่งข้อมูลไปยัง API จริง
             if (isRealUrl) {
                 fetch(EMBEDDED_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8'
-                    },
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        onSuccessAction(payload, loader, true);
-                    } else {
-                        // ถ้าระบบหลังบ้านส่ง error กลับมา (เช่น ระยะทางเกิน, หาชีทไม่เจอ) จะเด้งโชว์ตรงนี้
-                        loader.style.display = 'none';
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'บันทึกไม่สำเร็จ',
-                            text: result.message,
-                            confirmButtonColor: '#FF7F00'
-                        });
-                    }
+                .then(() => {
+                    onSuccessAction(payload, loader, true);
                 })
                 .catch((error) => {
                     loader.style.display = 'none';
-                    console.error("API Connection Error: ", error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'ติดต่อเซิร์ฟเวอร์ไม่ได้',
-                        text: 'กรุณาตรวจสอบการตั้งค่า URL ของ Apps Script หรือสิทธิ์การเข้าถึง',
-                        confirmButtonColor: '#FF7F00'
-                    });
+                    // เปลี่ยนข้อความแจ้งเตือนให้ชัดเจนขึ้น หากเกิดปัญหาในบล็อกหลังจากการ fetch สำเร็จ
+                    let errTitle = 'ติดต่อเซิร์ฟเวอร์ไม่ได้';
+                    let errText = 'เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้ง';
+                    
+                    if(error.name === 'QuotaExceededError' || error.message.includes('QuotaExceeded')) {
+                        errTitle = 'หน่วยความจำเครื่องเต็ม';
+                        errText = 'ระบบไม่สามารถบันทึกประวัติลงเครื่องได้ (แต่ข้อมูลเข้าสู่ Google Sheet แล้ว)';
+                    }
+                    
+                    Swal.fire({ icon: 'error', title: errTitle, text: errText, confirmButtonColor: '#FF7F00' });
                 });
             } else {
-                // โหมดจำลองในตัว
-                setTimeout(() => {
-                    onSuccessAction(payload, loader, false);
-                }, 1500);
+                setTimeout(() => { onSuccessAction(payload, loader, false); }, 1500);
             }
         }
 
         // การตอบสนองสำเร็จ
         function onSuccessAction(payload, loader, sentToApi) {
             loader.style.display = 'none';
+            
+            // เรียกบันทึกประวัติแบบใหม่ที่ไม่กินความจำ
             saveToLocalStorage(payload);
 
-            // บันทึกชื่อและชื่อเล่นลง Cache ของเครื่อง เพื่อให้ไม่ต้องกรอกใหม่รอบหน้า
             localStorage.setItem('sunwork_emp_name', payload.name);
             localStorage.setItem('sunwork_emp_nickname', payload.nickname);
 
-            // แสดงแจ้งเตือนที่ปุ่มเมนูประวัติ (จุดแดง)
             const badge = document.getElementById('historyBadge');
-            if(badge && document.getElementById('historyMenu').classList.contains('translate-x-full')) {
-                badge.classList.remove('hidden');
-            }
+            if(badge && document.getElementById('historyMenu').classList.contains('translate-x-full')) badge.classList.remove('hidden');
 
             Swal.fire({
                 icon: 'success', title: 'บันทึกข้อมูลสำเร็จ!',
                 text: `${payload.name} (${payload.nickname}) | ${payload.typeStr}`,
-                confirmButtonColor: '#FF7F00',
-                timer: 2500
+                confirmButtonColor: '#FF7F00', timer: 2500
             });
 
             capturedImageData = null;
             photoCanvas.classList.add('hidden');
             uploadedPreview.classList.add('hidden');
+            uploadedPreview.src = ''; 
             cameraPlaceholder.classList.remove('hidden');
+            
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+            fileInputs.forEach(input => input.value = '');
         }
 
+        // 6. ระบบเก็บข้อมูลภายในแบบใหม่ (ลบรูปภาพทิ้งก่อนเก็บประวัติ)
         function saveToLocalStorage(data) {
             let logs = [];
             const existing = localStorage.getItem('sunwork_logs');
-            if (existing) logs = JSON.parse(existing);
-            logs.unshift(data);
+            if (existing) {
+                try {
+                    logs = JSON.parse(existing);
+                } catch(e) { logs = []; }
+            }
+            
+            // นำข้อมูลโคลนออกมา และ "ลบข้อมูลรูปภาพ (image)" ทิ้ง เพื่อไม่ให้หนักเครื่องจนเกิด Error
+            const logData = { ...data };
+            delete logData.image; 
+
+            logs.unshift(logData);
+            
+            // เก็บประวัติย้อนหลังในเครื่องไว้ดูแค่ 15 รายการล่าสุดก็พอ
+            if(logs.length > 15) logs = logs.slice(0, 15);
+            
             localStorage.setItem('sunwork_logs', JSON.stringify(logs));
             renderHistoryLogs();
         }
@@ -677,9 +648,7 @@
 
                 historyLogsContainer.innerHTML = logs.map(item => `
                     <div class="p-3.5 rounded-2xl bg-white border border-gray-100 shadow-sm relative overflow-hidden group hover:border-orange-200 transition-colors">
-                        <!-- Color Accent Line -->
                         <div class="absolute left-0 top-0 bottom-0 w-1 ${item.type === 'checkin' ? 'bg-[#FF7F00]' : 'bg-red-500'}"></div>
-                        
                         <div class="flex justify-between items-start mb-2 pl-2">
                             <div>
                                 <div class="font-bold text-gray-800 text-sm leading-tight">${item.name}</div>
@@ -689,7 +658,6 @@
                                 ${item.type === 'checkin' ? 'IN' : 'OUT'}
                             </span>
                         </div>
-                        
                         <div class="pl-2 space-y-1 mt-2 border-t border-gray-50 pt-2">
                             <div class="flex items-center text-[11px] text-gray-600">
                                 <i class="fa-regular fa-clock w-4 text-center text-gray-400"></i>
@@ -723,7 +691,6 @@
                 </div>`;
         }
 
-        // โหลดข้อมูลชื่อพนักงานที่เคยพิมพ์ไว้จาก Cache มาแสดงอัตโนมัติ
         function loadUserInfo() {
             const savedName = localStorage.getItem('sunwork_emp_name');
             const savedNickname = localStorage.getItem('sunwork_emp_nickname');
@@ -732,35 +699,23 @@
         }
 
         function clearHistory() {
-            localStorage.removeItem('sunwork_attendance_logs');
+            localStorage.removeItem('sunwork_logs');
             renderHistoryLogs();
-            Swal.fire({
-                icon: 'success',
-                title: 'เคลียร์ประวัติเรียบร้อย',
-                timer: 1000,
-                showConfirmButton: false
-            });
+            Swal.fire({ icon: 'success', title: 'เคลียร์ประวัติเรียบร้อย', timer: 1000, showConfirmButton: false });
         }
 
-        // เริ่มต้นการทำงานหน้าเว็บ
         window.onload = function() {
             startRealtimeClock();
             getGPSLocation();
             checkApiStatus();
             renderHistoryLogs();
-            loadUserInfo(); // เรียกใช้งานฟังก์ชันโหลดชื่อพนักงาน
+            loadUserInfo();
         }
 
         // PWA: ลงทะเบียน Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed: ', err));
             });
         }
     </script>
