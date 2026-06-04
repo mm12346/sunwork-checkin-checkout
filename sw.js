@@ -21,7 +21,6 @@ self.addEventListener('install', event => {
 });
 
 // ดึงข้อมูล: เน้นดึงจาก Network ก่อนเพื่อให้ได้ข้อมูลอัปเดต (Network First)
-// ถ้าออฟไลน์หรือเน็ตหลุด จะดึงจาก Cache มาแสดงแทน
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   
