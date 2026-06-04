@@ -442,13 +442,15 @@
             }
         }
 
-        // 3. GPS และสถานะระบบ
+        // 3. ปรับปรุง GPS ให้รองรับระบบแอนดรอยด์ได้ดีขึ้น
         function getGPSLocation() {
             const coordsSpan = document.getElementById('gpsCoordinates');
             const statusBox = document.getElementById('gpsStatusBox');
             const statusIcon = document.getElementById('gpsStatusIcon');
             
             coordsSpan.textContent = "กำลังระบุตำแหน่ง...";
+            coordsSpan.classList.replace('text-red-600', 'text-gray-600');
+            coordsSpan.classList.replace('text-green-700', 'text-gray-600');
             statusBox.className = "bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 flex items-center gap-2 transition-colors duration-300";
             statusIcon.className = "fa-solid fa-spinner fa-spin text-yellow-500";
 
@@ -461,10 +463,42 @@
                         statusIcon.className = "fa-solid fa-circle-check text-green-500";
                     },
                     (error) => {
-                        coordsSpan.textContent = "จำลองพิกัด: 13.82336, 100.50354 (ไม่สามารถเข้าถึง GPS ได้)";
+                        console.warn("GPS Error: ", error);
+                        let errMsg = "ไม่สามารถเข้าถึงตำแหน่งได้";
+                        let suggestion = "";
+
+                        // เช็ค Error Code เพื่อแจ้งเตือนให้ตรงจุด
+                        if (error.code === 1) { // PERMISSION_DENIED
+                            errMsg = "ท่านปฏิเสธสิทธิ์การเข้าถึงตำแหน่ง (GPS)";
+                            suggestion = "หากเปิดผ่านแอป LINE แนะนำให้กดเมนูมุมขวาบน เลือก <b>'เปิดด้วยเบราว์เซอร์อื่น' (Open in Browser)</b>";
+                        } else if (error.code === 2) { // POSITION_UNAVAILABLE
+                            errMsg = "สัญญาณ GPS ไม่พร้อมใช้งานในขณะนี้";
+                            suggestion = "โปรดตรวจสอบว่าเปิดบริการตำแหน่งที่ตั้ง (Location) บนเครื่องแล้วหรือไม่";
+                        } else if (error.code === 3) { // TIMEOUT
+                            errMsg = "หมดเวลาในการค้นหาสัญญาณ (Timeout)";
+                            suggestion = "สัญญาณ GPS อ่อน โปรดลองกดปุ่ม <b>'อัพเดทพิกัด'</b> ใหม่อีกครั้ง";
+                        }
+
+                        // ไม่ใช้พิกัดจำลองแล้ว เพื่อบังคับให้ผู้ใช้ตั้งค่าให้ถูกต้อง
+                        coordsSpan.textContent = `ข้อผิดพลาด: ${errMsg}`;
+                        coordsSpan.classList.replace('text-gray-600', 'text-red-600');
                         statusBox.className = "bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-2 transition-colors duration-300";
                         statusIcon.className = "fa-solid fa-triangle-exclamation text-red-500";
-                    }, { enableHighAccuracy: true, timeout: 5000 }
+
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'ปัญหาการดึงพิกัด GPS',
+                            html: `<div class="text-left text-sm space-y-2 mt-2">
+                                   <p class="text-red-500 font-bold">${errMsg}</p>
+                                   <p>${suggestion}</p>
+                                   <p class="text-xs text-gray-500 mt-3 pt-3 border-t"><b>วิธีแก้เบื้องต้น:</b> ลองอนุญาตการเข้าถึงตำแหน่ง หรือหากใช้งานในแอปโซเชียล ให้เปิดเว็บนี้ใน Chrome หรือ Safari แทน</p>
+                                   </div>`,
+                            confirmButtonColor: '#FF7F00',
+                            confirmButtonText: 'เข้าใจแล้ว'
+                        });
+                    }, 
+                    // บังคับดึงพิกัดใหม่เสมอ (maximumAge: 0) เพื่อป้องกันการใช้พิกัดเดิมที่แคชไว้ และให้เวลาค้นหา 15 วินาที
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
                 );
             } else { 
                 coordsSpan.textContent = "อุปกรณ์ไม่รองรับ GPS"; 
@@ -537,6 +571,13 @@
             const otNoteValue = document.getElementById('otNote').value.trim();
             
             let coords = document.getElementById('gpsCoordinates').textContent;
+            
+            // เช็คว่าพิกัดถูกต้องหรือไม่ (ป้องกันการส่งแบบไม่มีพิกัด)
+            if(coords.includes('ข้อผิดพลาด') || coords.includes('กำลังระบุ') || coords.includes('ไม่รองรับ')) {
+                 Swal.fire({ icon: 'warning', title: 'ยังไม่พบพิกัด GPS', text: 'กรุณากดอัพเดทพิกัด และอนุญาตการเข้าถึงตำแหน่งก่อนลงเวลา', confirmButtonColor: '#FF7F00' });
+                 return;
+            }
+            
             const coordsMatch = coords.match(/(-?\d+\.\d+,\s*-?\d+\.\d+)/);
             coords = coordsMatch ? coordsMatch[0] : "ไม่พบพิกัด";
 
