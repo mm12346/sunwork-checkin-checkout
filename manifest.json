@@ -1,0 +1,23 @@
+{
+  "name": "ระบบลงเวลาทำงาน - บริษัท ซัน เวิร์ค จำกัด",
+  "short_name": "SunWork",
+  "description": "แอปพลิเคชันสำหรับลงเวลาเข้า-ออกงาน บริษัท ซัน เวิร์ค จำกัด",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fcfcfc",
+  "theme_color": "#FF7F00",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/mm12346/sunwork-checkin-checkout/refs/heads/main/Sunworkicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/mm12346/sunwork-checkin-checkout/refs/heads/main/Sunworkicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
