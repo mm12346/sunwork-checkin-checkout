@@ -198,18 +198,22 @@
                         placeholder="ระบุรายละเอียด (หากไม่มีใส่ -)"></textarea>
                 </div>
 
-                <!-- รูปภาพ/กล้อง (ดีไซน์ใหม่) -->
+                <!-- รูปภาพ/กล้อง (สัดส่วน 4:3 แนวนอน) -->
                 <div>
-                    <div class="relative rounded-2xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-300 aspect-[3/4] w-2/3 max-w-[260px] mx-auto flex flex-col items-center justify-center shadow-sm transition-all hover:border-orange-300 mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">
+                        <i class="fa-solid fa-camera text-[#FF7F00] mr-1"></i> ภาพเช็คอินยืนยันตัวตน
+                    </label>
+
+                    <!-- กรอบกล้องปรับดีไซน์ใหม่ตามภาพอ้างอิง -->
+                    <div class="relative rounded-2xl overflow-hidden bg-[#fafafa] border-2 border-dashed border-gray-300 aspect-[4/3] w-full flex flex-col items-center justify-center transition-all mb-4">
                         <video id="webcam" class="hidden absolute inset-0 w-full h-full object-cover" autoplay playsinline></video>
                         <canvas id="photoCanvas" class="hidden absolute inset-0 w-full h-full object-cover"></canvas>
                         <img id="uploadedPreview" class="hidden absolute inset-0 w-full h-full object-cover" src="" alt="ภาพพนักงาน">
 
-                        <div id="cameraPlaceholder" class="text-center p-4">
-                            <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-[#FF7F00] mx-auto mb-2">
-                                <i class="fa-solid fa-image-portrait text-xl"></i>
-                            </div>
-                            <p class="text-sm font-semibold text-gray-600">ยังไม่มีการถ่ายภาพ</p>
+                        <div id="cameraPlaceholder" class="text-center p-6 flex flex-col items-center justify-center w-full h-full">
+                            <i class="fa-solid fa-camera text-5xl text-gray-400 mb-3 opacity-80"></i>
+                            <p class="text-[13px] md:text-sm font-bold text-gray-600">โปรดเตรียมถ่ายรูปหรือเลือกไฟล์ภาพ</p>
+                            <p class="text-[10px] md:text-xs text-gray-400 mt-1 font-medium">รูปจะถูกย่อขนาดและส่งบันทึกในระบบโดยอัตโนมัติ</p>
                         </div>
                     </div>
 
@@ -265,13 +269,6 @@
                     ส่งข้อมูลลงบันทึกเวลา
                 </button>
             </form>
-        </div>
-
-        <!-- Footer ย้ายเข้ามาใน Container เพื่อให้จัด Layout ได้พอดีจอ -->
-        <div class="mt-auto pb-6 pt-4 shrink-0">
-            <p class="text-xs text-gray-400 text-center select-none font-light">
-                © 2026 SUNWORK COMPANY LIMITED. All Rights Reserved.
-            </p>
         </div>
     </div>
 
@@ -349,11 +346,11 @@
             }, 1000);
         }
 
-        // 2. จัดการกล้องถ่ายภาพ
+        // 2. จัดการกล้องถ่ายภาพ (ตั้งค่าความละเอียดเริ่มต้นเป็นแนวนอน)
         async function initiateWebcam() {
             if (isCameraActive) { stopWebcam(); return; }
             try {
-                const constraints = { video: { facingMode: "user", width: { ideal: 480 }, height: { ideal: 640 } }, audio: false };
+                const constraints = { video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } }, audio: false };
                 localStream = await navigator.mediaDevices.getUserMedia(constraints);
                 webcamElement.srcObject = localStream;
                 webcamElement.classList.remove('hidden');
@@ -390,9 +387,9 @@
         function takeSnapshot() {
             if (!isCameraActive) return;
             
-            // กำหนดขนาดภาพสุดท้ายที่ต้องการให้ออกมาเป็น 3:4
-            const targetWidth = 480;
-            const targetHeight = 640;
+            // กำหนดขนาดภาพสุดท้ายที่ต้องการให้ออกมาเป็น 4:3 (แนวนอน)
+            const targetWidth = 640;
+            const targetHeight = 480;
             
             photoCanvas.width = targetWidth;
             photoCanvas.height = targetHeight;
@@ -401,7 +398,7 @@
             const videoW = webcamElement.videoWidth;
             const videoH = webcamElement.videoHeight;
             
-            // คำนวณเพื่อครอปภาพตรงกลาง (Crop Center) ในกรณีที่กล้องส่งภาพมาไม่ใช่ 3:4
+            // คำนวณเพื่อครอปภาพตรงกลาง (Crop Center) ในกรณีที่กล้องส่งภาพมาไม่ใช่ 4:3
             const videoAspect = videoW / videoH;
             const targetAspect = targetWidth / targetHeight;
             
@@ -411,11 +408,11 @@
             let offsetY = 0;
 
             if (videoAspect > targetAspect) {
-                // วิดีโอกว้างกว่า 3:4 ให้ครอปซ้าย-ขวาออก
+                // วิดีโอกว้างกว่า 4:3 ให้ครอปซ้าย-ขวาออก
                 drawWidth = videoH * targetAspect;
                 offsetX = (videoW - drawWidth) / 2;
             } else {
-                // วิดีโอสูงกว่า 3:4 ให้ครอปบน-ล่างออก
+                // วิดีโอสูงกว่า 4:3 ให้ครอปบน-ล่างออก
                 drawHeight = videoW / targetAspect;
                 offsetY = (videoH - drawHeight) / 2;
             }
