@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sunwork-pwa-v4';
+const CACHE_NAME = 'sunwork-pwa-v5';
 const urlsToCache = [
   './',
   './index.html',
